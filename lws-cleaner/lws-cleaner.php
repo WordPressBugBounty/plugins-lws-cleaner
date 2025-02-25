@@ -4,10 +4,10 @@
  * Plugin Name:       LWS Cleaner
  * Plugin URI:        https://www.lws.fr/
  * Description:       With LWS Cleaner, clean your website, it's fast and easy. Clean your posts, comments, terms, users or even unused medias with this plugin.
- * Version:           2.4.1.2
+ * Version:           2.4.1.3
  * Author:            LWS
  * Author URI:        https://www.lws.fr
- * Tested up to:      6.6
+ * Tested up to:      6.7
  * Domain Path:       /languages
  *
  * @since             1.0
