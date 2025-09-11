@@ -159,12 +159,6 @@ foreach ($plugins as $slug => $plugin) {
                 </div>
             </div> -->
 
-            <div class="tab-pane main-tab-pane" id="files" role="tabpanel" aria-labelledby="nav-files" tabindex="-1" hidden>
-                <div id="post-body" class="lws_cl_configpage">
-                    <?php include plugin_dir_path(__FILE__) . 'lws_cl_files.php'; ?>
-                </div>
-            </div>
-
             <div class="tab-pane main-tab-pane" id="plugins" role="tabpanel" aria-labelledby="nav-plugins" tabindex="-1" hidden>
                 <div id="post-body" class="lws_cl_configpage_plugin">
                     <?php include plugin_dir_path(__FILE__) . 'lws_cl_plugins.php'; ?>
@@ -331,11 +325,6 @@ foreach ($plugins as $slug => $plugin) {
         }
         const parent = target.parentNode;
         const grandparent = parent.parentNode.parentNode;
-
-        // If accessing "files" tab, load all files for the tab. Helps loading the page faster
-        if (target.getAttribute('aria-controls') == "files") {
-            loading_files();
-        }
 
         // Remove all current selected tabs
         parent

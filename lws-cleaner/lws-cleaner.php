@@ -4,10 +4,10 @@
  * Plugin Name:       LWS Cleaner
  * Plugin URI:        https://www.lws.fr/
  * Description:       With LWS Cleaner, clean your website, it's fast and easy. Clean your posts, comments, terms, users or even unused medias with this plugin.
- * Version:           2.4.1.3
+ * Version:           2.4.2
  * Author:            LWS
  * Author URI:        https://www.lws.fr
- * Tested up to:      6.7
+ * Tested up to:      6.8
  * Domain Path:       /languages
  *
  * @since             1.0
@@ -190,7 +190,6 @@ function lws_cl_page()
         array('settings', __('Settings', 'lws-cleaner')),
         array('pluginsandthemes', __('Plugins/Themes', 'lws-cleaner')),
         // array('medias', __('Medias', 'lws-cleaner')),
-        array('files', __('Files', 'lws-cleaner')),
         array('plugins', __('Our plugins', 'lws-cleaner')),
     );
 
@@ -226,7 +225,7 @@ function lws_cl_page()
     $trash_number = $wpdb->query("SELECT * FROM $wpdb->posts WHERE post_status='trash'");
     $orphan_number = $wpdb->query("SELECT * FROM $wpdb->postmeta WHERE post_id NOT IN(SELECT ID FROM $wpdb->posts)");
     $oembed_number = $wpdb->query("SELECT * FROM $wpdb->postmeta WHERE meta_key LIKE('%_oembed_%')");
-    $duplicate_number = $wpdb->query("SELECT GROUP_CONCAT(meta_id ORDER BY meta_id DESC) AS ids, post_id, COUNT(*) AS count FROM $wpdb->postmeta 
+    $duplicate_number = $wpdb->query("SELECT GROUP_CONCAT(meta_id ORDER BY meta_id DESC) AS ids, post_id, COUNT(*) AS count FROM $wpdb->postmeta
     GROUP BY post_id, meta_key, meta_value HAVING count > 1");
 
     $posts_lists = array(
@@ -291,7 +290,7 @@ function lws_cl_page()
     $spam_number = $wpdb->query("SELECT * FROM $wpdb->comments WHERE comment_approved='spam'");
     $trashed_number = $wpdb->query("SELECT * FROM $wpdb->comments WHERE comment_approved='trash'");
     $orphan_comments_number = $wpdb->query("SELECT * FROM $wpdb->commentmeta WHERE comment_id NOT IN(SELECT comment_ID FROM $wpdb->comments)");
-    $duplicate_comments_number = $wpdb->query("SELECT GROUP_CONCAT(meta_id ORDER BY meta_id DESC) 
+    $duplicate_comments_number = $wpdb->query("SELECT GROUP_CONCAT(meta_id ORDER BY meta_id DESC)
     AS ids, comment_id, COUNT(*) AS count FROM $wpdb->commentmeta GROUP BY comment_id, meta_key, meta_value HAVING count > 1");
 
     $comments_lists = array(
@@ -614,208 +613,6 @@ function lws_cleaner_convert($size)
     return @round($size / pow(1024, ($i = floor(log($size, 1024)))), 2) . '' . $unit[$i];
 }
 
-
-function recursive_reading($path)
-{
-    global $max_path, $all_files;
-    $min_path = (count(explode('/', ABSPATH)));
-    $max_path = $min_path + 2;
-    $list_files = array();
-    foreach (list_files($path, 1) as $files) {
-        if (is_dir($files)) {
-            $list_files[] = array('dir' => $files);
-        } else {
-            $list_files[] = array('file' => $files);
-        }
-    }
-
-    usort($list_files, "lws_cl_sort_files");
-    foreach ($list_files as $files) {
-        $files = reset($files);
-        $is_deletable = true;
-        $path_to_file = $files;
-        $clean_path = str_replace(ABSPATH, '', $path_to_file);
-
-        if (is_dir($files)) {
-            $files = explode('/', $files);
-            end($files);
-            $files = prev($files);
-
-            foreach ($all_files as $name => $checksums) {
-                if (preg_match('/' . $files . '/', $name) || preg_match("/^" . $files . '/', $name)) {
-                    $is_deletable = false;
-                    break;
-                }
-            }
-
-            $actual_path_size = count(explode('/', $path_to_file));
-            if ($actual_path_size < $max_path - 2) {
-                $class = 'lws_cl_dir_accordion lws_cl_dir_accordion_white';
-                $can_go = true;
-            } elseif ($actual_path_size == $max_path - 1) {
-                $class = 'lws_cl_dir_accordion lws_cl_dir_accordion_black';
-                $can_go = true;
-            } elseif ($actual_path_size == $max_path) {
-                $class = 'lws_cl_dir_accordion lws_cl_dir_accordion_blue';
-                $can_go = true;
-            } else {
-                $class = 'lws_cl_dir_accordion_nope';
-                $can_go = false;
-            }
-    ?>
-            <div class='<?php echo esc_attr($class) ?>'>
-                <span class="lws_cl_dir_block_name lws_cl_block_child">
-                    <img style="vertical-align:middle" alt="0" src=<?php echo esc_url(plugin_dir_url(__FILE__) . 'images/dossier.svg') ?>>
-                    <strong><?php echo esc_html($files) ?></strong>
-                    <?php if ($can_go) : ?>
-                        <img class="" width="15px" alt="chevron" src=<?php echo esc_url(plugin_dir_url(__FILE__) . 'images/chevron.svg') ?>>
-                    <?php endif ?>
-                </span>
-
-                <span class="lws_cl_block_child">
-                    <?php echo esc_html(lws_cleaner_convert(folderSize($path_to_file))); ?>
-                </span>
-
-                <span class="lws_cl_block_child">
-                    <?php if ($is_deletable) : ?>
-                        <span class="lws_cl_not_native">
-                            <img class="lws_cl_image_button" width="20px" height="20px" src="<?php echo esc_url(plugin_dir_url(__FILE__) . 'images/non_natif.svg') ?>">
-                            <span>
-                                <?php esc_html_e('Not native in WordPress', 'lws-cleaner'); ?>
-                            </span>
-                        </span>
-                    <?php else : ?>
-                        <span class="lws_cl_native">
-                            <img class="lws_cl_image_button" width="20px" height="20px" src="<?php echo esc_url(plugin_dir_url(__FILE__) . 'images/securiser.svg') ?>">
-                            <span>
-                                <?php esc_html_e('Native in WordPress', 'lws-cleaner'); ?></span>
-                        </span>
-                    <?php endif ?>
-                </span>
-
-                <?php if ($is_deletable) : ?>
-                    <span class="lws_cl_block_child">
-                        <button id="lws_cl_button_<?php echo esc_attr($files); ?>" class="lws_cl_files_delete_element lws_is_dir" value='<?php echo esc_attr($path_to_file); ?>' onclick="delete_element(this)">
-                            <span class="" name="update">
-                                <img class="lws_cl_image_button" width="20px" height="20px" src="<?php echo esc_url(plugin_dir_url(__FILE__) . 'images/supprimer.svg') ?>">
-                                <?php esc_html_e('Delete', 'lws-cleaner'); ?>
-                            </span>
-                            <span class="hidden" name="loading">
-                                <img class="lws_cl_image_button" width="15px" height="15px" src="<?php echo esc_url(plugin_dir_url(__FILE__) . 'images/loading.svg') ?>">
-                                <span id="loading_1"><?php esc_html_e("Deletion...", "lws-cleaner"); ?></span>
-                            </span>
-                            <span class="hidden" name="validated">
-                                <img class="lws_cl_image_button" width="18px" height="18px" src="<?php echo esc_url(plugin_dir_url(__FILE__) . 'images/check_blanc.svg') ?>">
-                                <?php esc_html_e('Deleted', 'lws-cleaner'); ?>
-                                &nbsp;
-                            </span>
-                        </button>
-                    </span>
-                <?php else : ?>
-                    <span><?php esc_html_e('', 'lws-cleaner'); ?></span>
-                <?php endif ?>
-            </div>
-            <?php if ($can_go) : ?>
-                <div class="lws_cl_inblock">
-                    <?php recursive_reading($path_to_file); ?>
-                </div>
-            <?php endif ?>
-        <?php
-        } else {
-            $files = explode('/', $files);
-            $files = end($files);
-            $is_deletable = !array_key_exists($clean_path, $all_files);
-        ?>
-            <div class="lws_cl_dir_accordion">
-                <span class="lws_cl_file_block_name lws_cl_block_child">
-                    <?php $ext = sanitize_text_field(pathinfo($files, PATHINFO_EXTENSION)); ?>
-                    <?php if (in_array($ext, array('php', 'html', 'js', 'py', 'ts'))) : ?>
-                        <img alt="1" src=<?php echo esc_url(plugin_dir_url(__FILE__) . 'images/fichier_code.svg') ?>>
-                    <?php elseif (in_array($ext, array('jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'))) : ?>
-                        <img alt="1" src=<?php echo esc_url(plugin_dir_url(__FILE__) . 'images/fichier_image.svg') ?>>
-                    <?php else : ?>
-                        <img alt="1" src=<?php echo esc_url(plugin_dir_url(__FILE__) . 'images/fichier_texte.svg') ?>>
-                    <?php endif ?>
-                    <span style="vertical-align:text-bottom"><?php echo esc_html($files) ?></span>
-                </span>
-
-                <span class="lws_cl_block_child">
-                    <?php echo esc_html(filesize($path_to_file) <= 0 ? '0b' : lws_cleaner_convert(filesize($path_to_file))); ?>
-                </span>
-
-                <span class="lws_cl_block_child">
-                    <?php if ($is_deletable) : ?>
-                        <span class="lws_cl_not_native">
-                            <img class="lws_cl_image_button" width="20px" height="20px" src="<?php echo esc_url(plugin_dir_url(__FILE__) . 'images/non_natif.svg') ?>">
-                            <span>
-                                <?php esc_html_e('Not native in WordPress', 'lws-cleaner'); ?>
-                            </span>
-                        </span>
-                    <?php else : ?>
-                        <span class="lws_cl_native">
-                            <img class="lws_cl_image_button" width="20px" height="20px" src="<?php echo esc_url(plugin_dir_url(__FILE__) . 'images/securiser.svg') ?>">
-                            <span>
-                                <?php esc_html_e('Native in WordPress', 'lws-cleaner'); ?></span>
-                        </span>
-                    <?php endif ?>
-                </span>
-
-                <span class="lws_cl_block_child">
-                    <?php if ($is_deletable) : ?>
-                        <button class="lws_cl_files_delete_element lws_is_file" value='<?php echo esc_attr($path_to_file); ?>' onclick="delete_element(this)">
-                            <span class="" name="update">
-                                <img class="lws_cl_image_button" width="20px" height="20px" src="<?php echo esc_url(plugin_dir_url(__FILE__) . 'images/supprimer.svg') ?>">
-                                <?php esc_html_e('Delete', 'lws-cleaner'); ?>
-                            </span>
-                            <span class="hidden" name="loading">
-                                <img class="lws_cl_image_button" width="15px" height="15px" src="<?php echo esc_url(plugin_dir_url(__FILE__) . 'images/loading.svg') ?>">
-                                <span id="loading_1"><?php esc_html_e("Deletion...", "lws-cleaner"); ?></span>
-                            </span>
-                            <span class="hidden" name="validated">
-                                <img class="lws_cl_image_button" width="18px" height="18px" src="<?php echo esc_url(plugin_dir_url(__FILE__) . 'images/check_blanc.svg') ?>">
-                                <?php esc_html_e('Deleted', 'lws-cleaner'); ?>
-                                &nbsp;
-                            </span>
-                        </button>
-                    <?php else : ?>
-                        <span><?php esc_html_e('', 'lws-cleaner'); ?></span>
-                    <?php endif ?>
-                </span>
-            </div>
-        <?php
-        }
-    }
-}
-
-
-add_action("wp_ajax_lws_cleaner_recursive_reading", "lws_cleaner_recursive_reading");
-function lws_cleaner_recursive_reading()
-{
-    global $max_path, $all_files;
-    check_ajax_referer('cleaner_recursive_reading', '_ajax_nonce');
-
-    $min_path = (count(explode('/', ABSPATH)));
-    $max_path = $min_path + 2;
-    $version = get_bloginfo('version');
-    $locale = get_bloginfo('language');
-    $locale = str_replace('-', '_', $locale);
-    $all_files = get_core_checksums($version, $locale);
-    if ($all_files === false) {
-        $version = explode('.', $version)[0];
-        $version .= ".0";
-        $all_files = get_core_checksums($version, $locale);
-    }
-    if ($all_files === false) {
-        $version = explode('.', $version)[0];
-        $version = ($version - 1) . '.0';
-        $all_files = get_core_checksums($version, $locale);
-    }
-    $all_files['wp-config.php'] = '';
-    recursive_reading(ABSPATH);
-    wp_die();
-}
-
-
 //AJAX Reminder//
 add_action("wp_ajax_lws_cleaner_reminder_ajax", "lws_cleaner_remind_me_later");
 function lws_cleaner_remind_me_later()
@@ -939,7 +736,7 @@ function lws_cl_post()
                 $wpdb->get_results("DELETE FROM $wpdb->postmeta WHERE meta_key LIKE('%_oembed_%')");
                 break;
             case 'duplicate_posts':
-                $duplicate_number = $wpdb->get_results("SELECT GROUP_CONCAT(meta_id ORDER BY meta_id DESC) 
+                $duplicate_number = $wpdb->get_results("SELECT GROUP_CONCAT(meta_id ORDER BY meta_id DESC)
                 AS ids, post_id, COUNT(*) AS count FROM $wpdb->postmeta GROUP BY post_id, meta_key, meta_value HAVING count > 1");
                 foreach ($duplicate_number as $key => $duplicate) {
                     $to_delete = array();
@@ -947,7 +744,7 @@ function lws_cl_post()
                     while (count($tmp) > 1) {
                         $to_delete[] = array_pop($tmp);
                     }
-                    $wpdb->get_results("DELETE FROM $wpdb->postmeta WHERE meta_id 
+                    $wpdb->get_results("DELETE FROM $wpdb->postmeta WHERE meta_id
                     IN (" . implode(',', $to_delete) . ") AND post_id = " . $duplicate->post_id);
                 }
                 break;
@@ -980,7 +777,7 @@ function lws_cl_comment()
                 $wpdb->get_results("DELETE FROM $wpdb->commentmeta WHERE comment_id NOT IN(SELECT comment_ID FROM $wpdb->comments)");
                 break;
             case 'duplicate_comments':
-                $duplicate_comments_number = $wpdb->get_results("SELECT GROUP_CONCAT(meta_id ORDER BY meta_id DESC) 
+                $duplicate_comments_number = $wpdb->get_results("SELECT GROUP_CONCAT(meta_id ORDER BY meta_id DESC)
                 AS ids, comment_id, COUNT(*) AS count FROM $wpdb->commentmeta GROUP BY comment_id, meta_key, meta_value HAVING count > 1");
                 foreach ($duplicate_comments_number as $key => $duplicate) {
                     $to_delete = array();
@@ -988,7 +785,7 @@ function lws_cl_comment()
                     while (count($tmp) > 1) {
                         $to_delete[] = array_pop($tmp);
                     }
-                    $wpdb->get_results("DELETE FROM $wpdb->commentmeta WHERE meta_id 
+                    $wpdb->get_results("DELETE FROM $wpdb->commentmeta WHERE meta_id
                     IN (" . implode(',', $to_delete) . ") AND comment_id = " . $duplicate->comment_id);
                 }
                 break;
@@ -1035,7 +832,7 @@ function lws_cl_term()
                 $wpdb->get_results("DELETE FROM $wpdb->termmate WHERE term_id NOT IN(SELECT term_id FROM $wpdb->terms)");
                 break;
             case 'duplicate_terms':
-                $duplicate_terms = $wpdb->get_results("SELECT GROUP_CONCAT(meta_id ORDER BY meta_id DESC) AS ids, term_id, COUNT(*) 
+                $duplicate_terms = $wpdb->get_results("SELECT GROUP_CONCAT(meta_id ORDER BY meta_id DESC) AS ids, term_id, COUNT(*)
                 AS count FROM $wpdb->termmeta GROUP BY term_id, meta_key, meta_value HAVING count > 1");
                 foreach ($duplicate_terms as $key => $duplicate) {
                     $to_delete = array();
@@ -1133,28 +930,6 @@ function lws_cl_pandt()
                     }
                 }
                 break;
-        }
-        wp_die(true);
-    }
-    wp_die(false);
-}
-
-//AJAX Files//
-add_action("wp_ajax_lws_cleaner_delete", "lws_cl_delete_file");
-function lws_cl_delete_file()
-{
-    check_ajax_referer('lws_cleaner_deletefiles', '_ajax_nonce');
-    if (isset($_POST['lws_cl_path']) && isset($_POST['lws_cl_type'])) {
-        require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
-        require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
-
-        $wp_filesystem = new WP_Filesystem_Direct(null);
-        $path = sanitize_text_field($_POST['lws_cl_path']);
-        $type = sanitize_text_field($_POST['lws_cl_type']);
-        if ($type == 'file') {
-            $wp_filesystem->delete($path, false, 'f');
-        } else {
-            $wp_filesystem->delete($path, true, 'd');
         }
         wp_die(true);
     }

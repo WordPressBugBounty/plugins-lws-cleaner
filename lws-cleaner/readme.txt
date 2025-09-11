@@ -2,8 +2,8 @@
 Contributors: aurelienlws
 Tags: LWS, Cleaning, Optimisation
 Requires at least: 5.0
-Tested up to: 6.7
-Stable tag: 2.4.1.3
+Tested up to: 6.8
+Stable tag: 2.4.2
 Requires PHP: 7.3
 Author : LWS
 Author URI: https://www.lws.fr/
@@ -69,12 +69,6 @@ In this tab you will find a list of media that appear to be unused.
 * Add media to the ignore list in a grouped way (to avoid deleting them by mistake)
 * Delete / ignore media on a case by case basis
 * Remove from the ignore list
-
-= Files =
-In this last tab, detect and delete non-WordPress native files found in your web files. Be sure to check if the folder/file in question is not useful to you. This system can help you free up space on your server and possibly find a suspicious file.
-
-* Delete a non-native WordPress folder
-* Delete a non-native file from WordPress
 
 This plugin is pre-installed when ordering one of these LWS webhosts: [WordPress hosting](https://www.lws.fr/hebergement_wordpress.php), Classic shared [web hosting](https://www.lws.fr/hebergement_web.php) and [cPanel hosting](https://www.lws.fr/hebergement-cpanel.php)
 
@@ -172,6 +166,9 @@ There are 3 different ways to install LWS Cleaner (as with any other wordpress.o
 9. File cleanup
 
 == Changelog ==
+
+= 2.4.2 =
+* Removed the Files tabs from the plugin, a security hazard with little utility
 
 = 2.4.1.2 =
 * Fixed issue where activating a plugin from the plugin tab was not working
