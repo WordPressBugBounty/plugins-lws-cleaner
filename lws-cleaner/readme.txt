@@ -3,7 +3,7 @@ Contributors: aurelienlws
 Tags: LWS, Cleaning, Optimisation
 Requires at least: 5.0
 Tested up to: 6.8
-Stable tag: 2.4.2
+Stable tag: 2.4.3
 Requires PHP: 7.3
 Author : LWS
 Author URI: https://www.lws.fr/
@@ -166,6 +166,9 @@ There are 3 different ways to install LWS Cleaner (as with any other wordpress.o
 9. File cleanup
 
 == Changelog ==
+
+= 2.4.3 =
+* Trashed post now verify correctly that it is indeed a post/page before deleting 
 
 = 2.4.2 =
 * Removed the Files tabs from the plugin, a security hazard with little utility

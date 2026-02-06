@@ -4,7 +4,7 @@
  * Plugin Name:       LWS Cleaner
  * Plugin URI:        https://www.lws.fr/
  * Description:       With LWS Cleaner, clean your website, it's fast and easy. Clean your posts, comments, terms, users or even unused medias with this plugin.
- * Version:           2.4.2
+ * Version:           2.4.3
  * Author:            LWS
  * Author URI:        https://www.lws.fr
  * Tested up to:      6.8
@@ -222,7 +222,7 @@ function lws_cl_page()
 
     $revision_number = $wpdb->query("SELECT * FROM $wpdb->posts WHERE post_type='revision'");
     $draft_number = $wpdb->query("SELECT * FROM $wpdb->posts WHERE post_status='auto-draft'");
-    $trash_number = $wpdb->query("SELECT * FROM $wpdb->posts WHERE post_status='trash'");
+    $trash_number = $wpdb->query("SELECT * FROM $wpdb->posts WHERE post_status='trash' AND post_type IN ('post', 'page')");
     $orphan_number = $wpdb->query("SELECT * FROM $wpdb->postmeta WHERE post_id NOT IN(SELECT ID FROM $wpdb->posts)");
     $oembed_number = $wpdb->query("SELECT * FROM $wpdb->postmeta WHERE meta_key LIKE('%_oembed_%')");
     $duplicate_number = $wpdb->query("SELECT GROUP_CONCAT(meta_id ORDER BY meta_id DESC) AS ids, post_id, COUNT(*) AS count FROM $wpdb->postmeta
@@ -727,7 +727,7 @@ function lws_cl_post()
                 $wpdb->get_results("DELETE FROM `" . $wpdb->posts . "` WHERE post_status='auto-draft'");
                 break;
             case 'trash_posts':
-                $wpdb->get_results("DELETE FROM `" . $wpdb->posts . "` WHERE post_status='trash'");
+                $wpdb->get_results("DELETE FROM `" . $wpdb->posts . "` WHERE post_status='trash' AND post_type IN ('post', 'page')");
                 break;
             case 'orphan_posts':
                 $wpdb->get_results("DELETE FROM $wpdb->postmeta WHERE post_id NOT IN(SELECT ID FROM $wpdb->posts)");
