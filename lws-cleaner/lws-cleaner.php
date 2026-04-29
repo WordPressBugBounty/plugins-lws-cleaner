@@ -4,10 +4,10 @@
  * Plugin Name:       LWS Cleaner
  * Plugin URI:        https://www.lws.fr/
  * Description:       With LWS Cleaner, clean your website, it's fast and easy. Clean your posts, comments, terms, users or even unused medias with this plugin.
- * Version:           2.4.3
+ * Version:           2.4.4
  * Author:            LWS
  * Author URI:        https://www.lws.fr
- * Tested up to:      6.8
+ * Tested up to:      6.9
  * Domain Path:       /languages
  *
  * @since             1.0
@@ -42,7 +42,7 @@ function lws_cl_traduction()
         add_filter('pings_open', 'lws_cl_disable_comments_status', 20, 2);
     }
     if (get_option('lws_cl_hide_comments')) {
-        add_filter('comments_array', 'lws_cl_disable_comments_hide_existing_comments', 10, 2);
+        add_filter('comments_array', '__return_empty_array');
     }
 }
 
@@ -220,8 +220,8 @@ function lws_cl_page()
 
     //POSTS//
 
-    $revision_number = $wpdb->query("SELECT * FROM $wpdb->posts WHERE post_type='revision'");
-    $draft_number = $wpdb->query("SELECT * FROM $wpdb->posts WHERE post_status='auto-draft'");
+    $revision_number = $wpdb->query("SELECT * FROM $wpdb->posts WHERE post_type='revision' AND post_parent IN (SELECT ID FROM $wpdb->posts WHERE post_type IN ('post', 'page'))");
+    $draft_number = $wpdb->query("SELECT * FROM $wpdb->posts WHERE post_status='auto-draft' AND post_type IN ('post', 'page')");
     $trash_number = $wpdb->query("SELECT * FROM $wpdb->posts WHERE post_status='trash' AND post_type IN ('post', 'page')");
     $orphan_number = $wpdb->query("SELECT * FROM $wpdb->postmeta WHERE post_id NOT IN(SELECT ID FROM $wpdb->posts)");
     $oembed_number = $wpdb->query("SELECT * FROM $wpdb->postmeta WHERE meta_key LIKE('%_oembed_%')");
