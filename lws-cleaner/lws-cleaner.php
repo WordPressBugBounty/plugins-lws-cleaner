@@ -4,7 +4,7 @@
  * Plugin Name:       LWS Cleaner
  * Plugin URI:        https://www.lws.fr/
  * Description:       With LWS Cleaner, clean your website, it's fast and easy. Clean your posts, comments, terms, users or even unused medias with this plugin.
- * Version:           2.4.4
+ * Version:           2.4.5
  * Author:            LWS
  * Author URI:        https://www.lws.fr
  * Tested up to:      6.9
@@ -159,7 +159,7 @@ function lwscl_review_ad_plugin()
         </div>
         <div style="padding:16px">
             <h1 class="lwscl_review_block_title"> <?php esc_html_e('Thank you for using LWS Cleaner!', 'lws-cleaner'); ?></h1>
-            <p class="lwscl_review_block_desc"><?php _e('Evaluate our plugin to help others clean their WordPress website!', 'lws-cleaner'); ?></p>
+            <p class="lwscl_review_block_desc"><?php esc_html_e('Evaluate our plugin to help others clean their WordPress website!', 'lws-cleaner'); ?></p>
             <a class="lwscl_button_rate_plugin" href="https://wordpress.org/support/plugin/lws-cleaner/reviews/" target="_blank"><img style="margin-right: 8px;" src="<?php echo esc_url(plugins_url('images/noter.svg', __FILE__)) ?>" width="15px" height="15px"><?php esc_html_e('Rate', 'lws-cleaner'); ?></a>
             <a class="lwscl_review_button_secondary" onclick="lws_cl_remind_me()"><?php esc_html_e('Remind me later', 'lws-cleaner'); ?></a>
             <a class="lwscl_review_button_secondary" onclick="lws_cl_do_not_bother_me()"><?php esc_html_e('Do not ask again', 'lws-cleaner'); ?></a>
@@ -639,6 +639,9 @@ add_action("wp_ajax_lwscleaner_deletePlugin", "lws_cleaner_delete_plugin");
 function lws_cleaner_delete_plugin()
 {
     check_ajax_referer('cleaner_delete_one_plugin', '_ajax_nonce');
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized', 403);
+    }
     $plugin_package = sanitize_text_field($_POST['lws_cleaner_delete_plugin_specific']);
     delete_plugins([$plugin_package]);
     wp_die();
@@ -648,6 +651,9 @@ add_action("wp_ajax_lwscleaner_deleteTheme", "lws_cleaner_delete_theme");
 function lws_cleaner_delete_theme()
 {
     check_ajax_referer('lwscleaner_delete_one_theme', '_ajax_nonce');
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized', 403);
+    }
     $theme_package = sanitize_text_field($_POST['lws_tk_delete_theme_specific']);
     delete_theme($theme_package);
     wp_die();
@@ -665,6 +671,9 @@ add_action("wp_ajax_lws_cl_activatePlugin", "lws_cleaner_activate_plugin");
 function lws_cleaner_activate_plugin()
 {
     check_ajax_referer('activateplugin_cleaner', '_ajax_nonce');
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized', 403);
+    }
     if (isset($_POST['ajax_slug'])) {
         switch (sanitize_textarea_field($_POST['ajax_slug'])) {
             case 'lws-hide-login':
@@ -715,6 +724,9 @@ function lws_cl_post()
 {
     global $wpdb;
     check_ajax_referer('lws_cleaner_posts', '_ajax_nonce');
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized', 403);
+    }
 
     if (isset($_POST['data'])) {
         $data = sanitize_text_field($_POST['data']);
@@ -760,6 +772,9 @@ function lws_cl_comment()
 {
     global $wpdb;
     check_ajax_referer('lws_cleaner_comments', '_ajax_nonce');
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized', 403);
+    }
     if (isset($_POST['data'])) {
         $data = sanitize_text_field($_POST['data']);
 
@@ -821,6 +836,9 @@ function lws_cl_term()
 {
     global $wpdb;
     check_ajax_referer('lws_cleaner_terms', '_ajax_nonce');
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized', 403);
+    }
 
     if (isset($_POST['data'])) {
         $data = sanitize_text_field($_POST['data']);
@@ -858,6 +876,9 @@ function lws_cl_user()
 {
     global $wpdb;
     check_ajax_referer('lws_cleaner_users', '_ajax_nonce');
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized', 403);
+    }
     if (isset($_POST['data'])) {
         $data = sanitize_text_field($_POST['data']);
 
@@ -888,6 +909,9 @@ function lws_cl_settings()
 {
     global $wpdb;
     check_ajax_referer('lws_cleaner_settings', '_ajax_nonce');
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized', 403);
+    }
     if (isset($_POST['data'])) {
         $data = sanitize_text_field($_POST['data']);
 
@@ -910,6 +934,9 @@ function lws_cl_pandt()
 {
     global $wpdb;
     check_ajax_referer('lws_cleaner_pluginsandthemes', '_ajax_nonce');
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized', 403);
+    }
     if (isset($_POST['data'])) {
         $data = sanitize_text_field($_POST['data']);
 
@@ -941,10 +968,13 @@ add_action("wp_ajax_lws_cleaner_ignore_element", "lws_cl_ignore_element");
 function lws_cl_ignore_element()
 {
     check_ajax_referer('lws_cleaner_ignoreelmt', '_ajax_nonce');
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized', 403);
+    }
     if (isset($_POST['data'])) {
         global $wpdb;
-        $value = sanitize_text_field($_POST['data']);
-        $wpdb->get_results("INSERT INTO {$wpdb->prefix}lws_cl_ignore (IDmedia) VALUES($value)");
+        $value = absint($_POST['data']);
+        $wpdb->query($wpdb->prepare("INSERT INTO {$wpdb->prefix}lws_cl_ignore (IDmedia) VALUES(%d)", $value));
         wp_die();
     }
 
@@ -955,10 +985,13 @@ add_action("wp_ajax_lws_cleaner_delete_element", "lws_cl_delete_element");
 function lws_cl_delete_element()
 {
     check_ajax_referer('lws_cleaner_dlteelmt', '_ajax_nonce');
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized', 403);
+    }
     if (isset($_POST['data'])) {
         global $wpdb;
-        $value = sanitize_text_field($_POST['data']);
-        $wpdb->get_results("DELETE FROM $wpdb->posts WHERE ID = $value");
+        $value = absint($_POST['data']);
+        $wpdb->query($wpdb->prepare("DELETE FROM $wpdb->posts WHERE ID = %d", $value));
         wp_die();
     }
 
@@ -969,10 +1002,13 @@ add_action("wp_ajax_lws_cleaner_unignore_element", "lws_cl_unignore_element");
 function lws_cl_unignore_element()
 {
     check_ajax_referer('lws_cleaner_unignrelmt', '_ajax_nonce');
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized', 403);
+    }
     if (isset($_POST['data'])) {
         global $wpdb;
-        $value = sanitize_text_field($_POST['data']);
-        $wpdb->get_results("DELETE FROM {$wpdb->prefix}lws_cl_ignore WHERE IDmedia = $value");
+        $value = absint($_POST['data']);
+        $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}lws_cl_ignore WHERE IDmedia = %d", $value));
         wp_die();
     }
 
@@ -1073,24 +1109,25 @@ if (!class_exists('LwsCL_MediaList')) :
             global $wpdb;
             $action = $this->current_action();
 
+            if ($action) {
+                check_admin_referer('bulk-' . $this->_args['plural']);
+            }
+
             switch ($action) {
                 case 'bulk-delete':
                     if (isset($_POST['bulk-delete'])) {
-                        $data = array();
-                        foreach ($_POST['bulk-delete'] as $d) {
-                            $data[] = sanitize_text_field($d);
-                        }
-                        $wpdb->get_results("DELETE FROM $wpdb->posts WHERE ID IN(" . implode(',', $data) . ")");
+                        $data = array_map('absint', $_POST['bulk-delete']);
+                        $placeholders = implode(',', array_fill(0, count($data), '%d'));
+                        $wpdb->query($wpdb->prepare("DELETE FROM $wpdb->posts WHERE ID IN($placeholders)", ...$data));
                         header("Refresh:0");
                     }
                     break;
 
                 case 'bulk-ignore':
-                    if (isset($_POST['bulk-delete'])) {
-                        foreach ($_POST['bulk-delete'] as $i) {
-                            $data = sanitize_text_field($i);
-                            $wpdb->get_results("INSERT INTO {$wpdb->prefix}lws_cl_ignore (IDmedia) VALUES ('$data')");
-                        }
+                    if (isset($_POST['bulk-ignore'])) {
+                        $data = array_map('absint', $_POST['bulk-ignore']);
+                        $placeholders = implode(',', array_fill(0, count($data), '%d'));
+                        $wpdb->query($wpdb->prepare("INSERT INTO {$wpdb->prefix}lws_cl_ignore (IDmedia) VALUES ($placeholders)", ...$data));
                         header("Refresh:0");
                     }
                     break;
@@ -1268,6 +1305,10 @@ if (!class_exists('LwsCL_MediaList_Ignored')) :
         {
             global $wpdb;
             $action = $this->current_action();
+
+            if ($action) {
+                check_admin_referer('bulk-' . $this->_args['plural']);
+            }
 
             switch ($action) {
                 case 'bulk-unignore':
