@@ -7,7 +7,7 @@
  * Version:           2.4.5
  * Author:            LWS
  * Author URI:        https://www.lws.fr
- * Tested up to:      6.9
+ * Tested up to:      7.1
  * Domain Path:       /languages
  *
  * @since             1.0

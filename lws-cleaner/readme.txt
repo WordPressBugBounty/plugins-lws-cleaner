@@ -2,7 +2,7 @@
 Contributors: aurelienlws
 Tags: LWS, Cleaning, Optimisation
 Requires at least: 5.0
-Tested up to: 6.9
+Tested up to: 7.1
 Stable tag: 2.4.5
 Requires PHP: 7.3
 Author : LWS
